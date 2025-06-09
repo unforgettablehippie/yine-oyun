@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Sarıl Bana! 🐸🍃</title>
+<title>Sarıl Bana 2: Kalplerin Yolculuğu 🐸❤️</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Comic+Neue:wght@700&display=swap');
 
@@ -14,15 +14,17 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    font-family: 'Comic Neue', cursive, sans-serif;
+    font-family: 'Comic Neue', cursive;
     overflow: hidden;
     touch-action: manipulation;
   }
 
   #game {
     position: relative;
-    width: 450px;
-    height: 450px;
+    width: 90vw;
+    max-width: 600px;
+    height: 90vw;
+    max-height: 600px;
     background: #d9f4d9;
     border-radius: 30px;
     box-shadow: 0 0 40px #a3d9a5aa;
@@ -39,16 +41,7 @@
     bottom: 0;
     animation: sway 3s ease-in-out infinite alternate;
   }
-  .grass:nth-child(1) { left: 20px; animation-delay: 0s; }
-  .grass:nth-child(2) { left: 60px; animation-delay: 1s; }
-  .grass:nth-child(3) { left: 100px; animation-delay: 0.7s; }
-  .grass:nth-child(4) { left: 140px; animation-delay: 1.5s; }
-  .grass:nth-child(5) { left: 180px; animation-delay: 1.2s; }
-  .grass:nth-child(6) { left: 220px; animation-delay: 0.4s; }
-  .grass:nth-child(7) { left: 260px; animation-delay: 0.9s; }
-  .grass:nth-child(8) { left: 300px; animation-delay: 0.3s; }
-  .grass:nth-child(9) { left: 340px; animation-delay: 1.1s; }
-  .grass:nth-child(10) { left: 380px; animation-delay: 1.8s; }
+  .grass:nth-child(n) { animation-delay: calc(0.2s * var(--i)); left: calc(30px * var(--i)); }
 
   @keyframes sway {
     0% { transform: rotate(0deg); }
@@ -57,12 +50,12 @@
 
   .pond {
     position: absolute;
-    width: 250px;
-    height: 120px;
+    width: 60%;
+    height: 100px;
     background: #89c6e9aa;
     border-radius: 100px / 50px;
-    bottom: 50px;
-    left: 100px;
+    bottom: 40px;
+    left: 20%;
     box-shadow: inset 0 0 30px #72a7d3aa;
   }
 
@@ -100,14 +93,8 @@
   }
 
   @keyframes flyUp {
-    0% {
-      opacity: 1;
-      transform: translateY(0);
-    }
-    100% {
-      opacity: 0;
-      transform: translateY(-50px);
-    }
+    0% { opacity: 1; transform: translateY(0); }
+    100% { opacity: 0; transform: translateY(-50px); }
   }
 
   #startButton {
@@ -123,38 +110,56 @@
     z-index: 100;
   }
 
+  #score {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    background: #ffffffcc;
+    padding: 5px 15px;
+    border-radius: 10px;
+    font-size: 16px;
+    color: #333;
+  }
 </style>
 </head>
 <body>
   <button id="startButton">Oyunu Başlat</button>
-  
-  <div id="game" style="display:none;">
-    <!-- Çimenler -->
-    <div class="grass"></div><div class="grass"></div><div class="grass"></div><div class="grass"></div><div class="grass"></div>
-    <div class="grass"></div><div class="grass"></div><div class="grass"></div><div class="grass"></div><div class="grass"></div>
 
-    <!-- Gölet -->
+  <div id="game" style="display:none;">
+    <div id="score">Sarılma: 0</div>
     <div class="pond"></div>
 
-    <!-- Karakter: Kurbağa -->
-    <div id="player" class="character" style="left: 40px; bottom: 70px;">🐸</div>
+    <!-- Çimenler -->
+    <script>
+      for (let i = 1; i <= 10; i++) {
+        const grass = document.createElement('div');
+        grass.className = 'grass';
+        grass.style.setProperty('--i', i);
+        document.getElementById('game').appendChild(grass);
+      }
+    </script>
 
-    <!-- Üzgün arkadaş: Kedi -->
+    <!-- Karakterler -->
+    <div id="player" class="character">🐸</div>
+
     <div id="friend1" class="friend sad" style="left: 320px; bottom: 110px;">🐱</div>
+    <div id="friend2" class="friend sad" style="left: 150px; bottom: 200px;">🐰</div>
+    <div id="friend3" class="friend sad" style="left: 220px; bottom: 300px;">🦔</div>
   </div>
 
-  <!-- Fon müziği -->
   <audio id="bgMusic" src="https://cdn.pixabay.com/download/audio/2021/08/04/audio_4a6e847953.mp3?filename=relaxing-asleep-ambient-11941.mp3" loop></audio>
 
   <script>
     const player = document.getElementById('player');
-    const friend1 = document.getElementById('friend1');
+    const friends = document.querySelectorAll('.friend');
     const game = document.getElementById('game');
     const bgMusic = document.getElementById('bgMusic');
     const startButton = document.getElementById('startButton');
+    const scoreBoard = document.getElementById('score');
 
     let playerPos = { x: 40, y: 70 };
-    const speed = 15;
+    let hugs = 0;
+    const speed = 20;
 
     startButton.addEventListener('click', () => {
       startButton.style.display = 'none';
@@ -171,21 +176,11 @@
 
     window.addEventListener('keydown', (e) => {
       switch(e.key) {
-        case 'ArrowLeft':
-          playerPos.x = Math.max(0, playerPos.x - speed);
-          break;
-        case 'ArrowRight':
-          playerPos.x = Math.min(game.clientWidth - 60, playerPos.x + speed);
-          break;
-        case 'ArrowUp':
-          playerPos.y = Math.min(game.clientHeight - 60, playerPos.y + speed);
-          break;
-        case 'ArrowDown':
-          playerPos.y = Math.max(0, playerPos.y - speed);
-          break;
-        case ' ': // sarılma tuşu
-          tryHug();
-          break;
+        case 'ArrowLeft': playerPos.x = Math.max(0, playerPos.x - speed); break;
+        case 'ArrowRight': playerPos.x = Math.min(game.clientWidth - 60, playerPos.x + speed); break;
+        case 'ArrowUp': playerPos.y = Math.min(game.clientHeight - 60, playerPos.y + speed); break;
+        case 'ArrowDown': playerPos.y = Math.max(0, playerPos.y - speed); break;
+        case ' ': tryHug(); break;
       }
       updatePlayerPosition();
     });
@@ -193,25 +188,26 @@
     function isNear(p1, p2, distance = 80) {
       const dx = p1.x - p2.x;
       const dy = p1.y - p2.y;
-      return Math.sqrt(dx*dx + dy*dy) < distance;
+      return Math.sqrt(dx * dx + dy * dy) < distance;
     }
 
     function tryHug() {
-      const friendPos = {
-        x: parseInt(friend1.style.left),
-        y: parseInt(friend1.style.bottom),
-      };
-      
-      if(isNear(playerPos, friendPos)) {
-        hugFriend(friend1);
-      }
+      friends.forEach(friend => {
+        const friendPos = {
+          x: parseInt(friend.style.left),
+          y: parseInt(friend.style.bottom),
+        };
+        if (friend.classList.contains('sad') && isNear(playerPos, friendPos)) {
+          hugFriend(friend);
+        }
+      });
     }
 
     function hugFriend(friend) {
-      if(friend.classList.contains('sad')) {
-        friend.classList.remove('sad');
-        spawnHeart(friend);
-      }
+      friend.classList.remove('sad');
+      spawnHeart(friend);
+      hugs++;
+      scoreBoard.textContent = `Sarılma: ${hugs}`;
     }
 
     function spawnHeart(friend) {
@@ -220,10 +216,7 @@
       heart.style.left = (parseInt(friend.style.left) + 18) + 'px';
       heart.style.bottom = (parseInt(friend.style.bottom) + 40) + 'px';
       game.appendChild(heart);
-
-      setTimeout(() => {
-        heart.remove();
-      }, 1000);
+      setTimeout(() => heart.remove(), 1000);
     }
   </script>
 </body>
